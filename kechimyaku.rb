@@ -3,7 +3,6 @@ require "sinatra/reloader"
 require "slim"
 require 'json'
 require 'sinatra/activerecord'
-require './views/helpers'
 
 configure :development do
   set :database, 'sqlite3:db/database.db'
@@ -15,7 +14,7 @@ get '/?' do
 end
 
 get '/api/masters/?' do
-  #return list of masters
+  @master = Master.where(is_root: true).first
 end
 
 get '/admin/?' do
