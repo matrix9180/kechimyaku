@@ -1,0 +1,54 @@
+{
+    "name": "Bodhidharma",
+    "children": [
+    {
+        "name": "Dàoyù"
+    },
+    {
+        "name": "Huike",
+        "children": [
+        {
+            "name": "Jianzhi Sengcan",
+            "children": [
+            {
+                "name": "Dayi Daoxin",
+                "children": [
+                {
+                    "name": "Daman Hongren",
+                    "children": [
+                    {
+                        "name": "Dajian Huineng",
+                        "children": [
+                            {
+                                "name": "Xuánjué"
+                            },
+                            {
+                                "name": "Heze Shenhui"
+                            },
+                            {
+                                "name": "Nanyue Huairang"
+                            },
+                            {
+                                "name": "Seigen Gyōshi"
+                            }]                           
+         
+                    },
+                    {
+                        "name": "Yuquan Shenxiu",
+                        "children": [
+                            {
+                                "name": "Xuánzé"
+                            }] 
+                    },
+                    {
+                        "name": "Faru",
+                        "children": [
+                            {
+                                "name": "Yuquan Shenxiu"
+                            }] 
+                    }]                           
+                }]
+            }]
+        }]
+    }]
+}   

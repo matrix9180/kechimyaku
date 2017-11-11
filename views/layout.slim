@@ -1,0 +1,41 @@
+
+doctype html
+
+meta[charset="utf-8"]
+
+link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous"
+
+script[src="http://code.jquery.com/jquery-1.10.2.min.js"]
+
+script[src="http://d3js.org/d3.v3.min.js"]
+
+script[src="javascripts/tree.js"]
+
+
+css:
+  .node { cursor: pointer; } 
+  .overlay{ background-color:#fff; } 
+  .node circle { fill: #fff; stroke: #ed1c24; stroke-width: 1.5px; } 
+  .node text { 
+    font-size:10px; 
+    font-family:sans-serif;
+    border: 1px solid #ed1c24;
+  } 
+  .link { fill: none; stroke: #ed1c24; stroke-width: 1.5px; } 
+  .templink { fill: none; stroke: red; stroke-width: 3px; } 
+  .ghostCircle.show{ display:block; } 
+  .ghostCircle, .activeDrag .ghostCircle{ display: none; }
+  .btn {margin-right: 5px;}
+  .logo {max-width:128px; max-height: 128px;}
+  .nav {margin-bottom: 20px;}
+  .container {padding-left: 30px !important; margin-left: 0px;}
+  .heading {margin-top: 30px; margin-bottom: 30px;}
+
+body
+  nav class="navbar navbar-default"
+    div class="container-fluid"
+      div class="navbar-header"
+        a class="navbar-brand" href="#"
+          img class="logo" alt="Kechimyaku" src="/images/kechimyaku_logo.png"
+  .container
+    == yield 

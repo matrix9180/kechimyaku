@@ -1,0 +1,30 @@
+
+form action="#{'/admin/masters/edit/' + params[:id]}" method="post"
+  .col-md-12
+    h3 Edit Master
+    .form-group
+      input name="name" type="text" class="form-control" placeholder="Name" value="#{@master.name}"
+    .form-group
+      input name="name_native" type="text" class="form-control" placeholder="Native Name" value="#{@master.name_native}"
+    .form-group
+      .row
+        .col-md-4
+          select name="parent_id" type="text" class="form-control"
+            option Select Teacher...
+            - @masters.each do |m|
+              option value="#{m.id}" selected=("selected" if @relationship != nil && m.id == @relationship.parent_master_id) =m.name
+        .col-md-4
+          select name="relationship_type_id" type="text" class="form-control"
+            option Select Transmission Type...
+            - @relationship_types.each do |rt|
+              option value="#{rt.id}" selected=("selected" if @relationship != nil && @relationship.relationship_type_id == rt.id) =rt.name
+    .form-group
+      input name="year_born" type="text" class="form-control" placeholder="Year of Birth e.g. 1500" value="#{@master.year_born}"
+    .form-group
+      input name="year_died" type="text" class="form-control" placeholder="Year of Death e.g. 1500" value="#{@master.year_died}"
+    .form-group
+      input name="location" type="text" class="form-control" placeholder="Location" value="#{@master.location}"
+    .form-group
+      textarea name="overview" class="form-control" placeholder="Overview..." rows="10" =@master.overview
+    .form-group
+      button type="submit" class="btn btn-dark" Update Master

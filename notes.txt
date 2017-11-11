@@ -1,0 +1,4 @@
+ssh 52.36.207.193 -l ubuntu -i /Users/kgmiller/.ssh/zendo.pem
+
+scp -r -i /Users/kgmiller/.ssh/zendo.pem kechimyaku ubuntu@52.36.207.193:/home/ubuntu/
+
