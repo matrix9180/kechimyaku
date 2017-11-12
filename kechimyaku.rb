@@ -15,6 +15,9 @@ end
 
 get '/api/masters/?' do
   @master = Master.where(is_root: true).first
+  master_tree = generate_master_tree(@master)
+  content_type :json 
+  master_tree.to_json
 end
 
 get '/admin/?' do
@@ -124,6 +127,21 @@ class Relationship < ActiveRecord::Base
 end
 
 class RelationshipType < ActiveRecord::Base
+end
+
+#FUNCTIONS
+
+def generate_master_tree(master)
+    node = {}
+    node[:master] = master
+    if master.child_masters.count > 0
+      node[:children] = []
+      master.child_masters.each do |cm|
+        node[:children].push(generate_master_tree(cm))
+      end
+    end
+
+    return node
 end
 
 #HELPERS

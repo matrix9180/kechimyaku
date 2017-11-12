@@ -27,7 +27,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 
 
 // Get JSON data
-treeJSON = d3.json("javascripts/kechimyaku.json", function(error, treeData) {
+treeJSON = d3.json("/api/masters", function(error, treeData) {
     
         // Calculate total nodes, max label length
         var totalNodes = 0;
@@ -75,7 +75,7 @@ treeJSON = d3.json("javascripts/kechimyaku.json", function(error, treeData) {
         // Call visit function to establish maxLabelLength
         visit(treeData, function(d) {
             totalNodes++;
-            maxLabelLength = Math.max(d.name.length, maxLabelLength);
+            maxLabelLength = Math.max(d.master.name.length, maxLabelLength);
     
         }, function(d) {
             return d.children && d.children.length > 0 ? d.children : null;
@@ -86,7 +86,7 @@ treeJSON = d3.json("javascripts/kechimyaku.json", function(error, treeData) {
     
         function sortTree() {
             tree.sort(function(a, b) {
-                return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
+                return b.master.name.toLowerCase() < a.master.name.toLowerCase() ? 1 : -1;
             });
         }
         // Sort the tree initially incase the JSON isn't in a sorted order.
@@ -345,8 +345,8 @@ treeJSON = d3.json("javascripts/kechimyaku.json", function(error, treeData) {
             scale = zoomListener.scale();
             x = -source.y0;
             y = -source.x0;
-            x = x * scale + 100;
-            y = y * scale + viewerHeight / 2;
+            x = x * scale + 80;
+            y = y * scale + viewerHeight / 2 - 100;
             d3.select('g').transition()
                 .duration(duration)
                 .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
@@ -439,7 +439,7 @@ treeJSON = d3.json("javascripts/kechimyaku.json", function(error, treeData) {
                     return d.children || d._children ? "end" : "start";
                 })
                 .text(function(d) {
-                    return d.name;
+                    return d.master.name;
                 })
                 .style("fill-opacity", 0);
     
@@ -469,7 +469,7 @@ treeJSON = d3.json("javascripts/kechimyaku.json", function(error, treeData) {
                     return d.children || d._children ? "end" : "start";
                 })
                 .text(function(d) {
-                    return d.name;
+                    return d.master.name;
                 });
     
             // Change the circle fill depending on whether it has children and is collapsed
