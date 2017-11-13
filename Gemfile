@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 gem "sinatra"
 gem "sinatra-reloader"
+gem "thin"
+gem "daemons"
 gem "slim"
 gem 'json'
 gem 'activerecord'

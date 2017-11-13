@@ -1,12 +1,13 @@
 require "sinatra"
 require "sinatra/reloader"
+#require "thin"
 require "slim"
 require 'json'
 require 'sinatra/activerecord'
 
 configure :development do
   set :database, 'sqlite3:db/database.db'
-  #set :port, 80
+  #set :server, 'thin'
 end
 
 get '/?' do
