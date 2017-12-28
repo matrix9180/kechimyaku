@@ -27,11 +27,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 
 
 // Get JSON data
+
+var teachers = [];
+var treeFunctions = {}
+
 treeJSON = d3.json("/api/masters", function(error, treeData) {
     
         // Calculate total nodes, max label length
         var totalNodes = 0;
-        var maxLabelLength = 10;
+        var maxLabelLength = 20;
         // variables for drag/drop
         var selectedNode = null;
         var draggingNode = null;
@@ -75,7 +79,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
         // Call visit function to establish maxLabelLength
         visit(treeData, function(d) {
             totalNodes++;
-            maxLabelLength = Math.max(d.master.name.length, maxLabelLength);
+            maxLabelLength = Math.max(d.master.name.length + d.master.name_native.length, maxLabelLength);
     
         }, function(d) {
             return d.children && d.children.length > 0 ? d.children : null;
@@ -86,11 +90,11 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
     
         function sortTree() {
             tree.sort(function(a, b) {
-                return b.master.name.toLowerCase() < a.master.name.toLowerCase() ? 1 : -1;
+                return (b.children != null) ? b.children.length : 0 < (a.children != null) ? a.children.length : 0;
             });
         }
         // Sort the tree initially incase the JSON isn't in a sorted order.
-        sortTree();
+        //sortTree();
     
         // TODO: Pan function, can be better implemented.
     
@@ -328,7 +332,29 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
     
         // Function to center node when clicked/dropped so node doesn't get lost when collapsing/moving with large amount of children.
     
-        function centerNode(source) {
+        function centerNode(source, highlight) {
+
+            sourceNode = source;
+            highlight = highlight || false;
+
+            
+            if (highlight) {
+                
+                node = svgGroup.selectAll("g.node").filter(function(n, i) {
+                    if(n.id == sourceNode.id) {
+                        return true;
+                    } 
+                    else {
+                        return false;
+                    }
+                });
+
+                if (node){
+                    node[0][0].children[1].setAttribute("class", "nodeTextHighlight")                
+                }
+            }
+
+
             scale = zoomListener.scale();
             x = -source.y0;
             y = -source.x0;
@@ -345,7 +371,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             scale = zoomListener.scale();
             x = -source.y0;
             y = -source.x0;
-            x = x * scale + 80;
+            x = x * scale + 173;
             y = y * scale + viewerHeight / 2 - 100;
             d3.select('g').transition()
                 .duration(duration)
@@ -373,8 +399,9 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
         function click(d) {
             if (d3.event.defaultPrevented) return; // click suppressed
             d = toggleChildren(d);
-            update(d);
-            centerNode(d);
+
+            //update(d);
+            //centerNode(d);
         }
     
         function update(source) {
@@ -394,7 +421,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 }
             };
             childCount(0, root);
-            var newHeight = d3.max(levelWidth) * 120; // 25 pixels per line  
+            var newHeight = d3.max(levelWidth) * 140; // 25 pixels per line  
             tree = tree.size([newHeight, viewerWidth]);
     
             // Compute the new tree layout.
@@ -403,7 +430,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
     
             // Set widths between levels based on maxLabelLength.
             nodes.forEach(function(d) {
-                d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
+                d.y = (d.depth * (maxLabelLength * 6)); //maxLabelLength * 10px
                 // alternatively to keep a fixed scale one can set a fixed depth per level
                 // Normalize for fixed-depth by commenting out below line
                 // d.y = (d.depth * 500); //500px per level.
@@ -418,6 +445,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             // Enter any new nodes at the parent's previous position.
             var nodeEnter = node.enter().append("g")
                 .call(dragListener)
+                .attr("id", function(d){return d.master.id})                
                 .attr("class", "node")
                 .attr("transform", function(d) {
                     return "translate(" + source.y0 + "," + source.x0 + ")";
@@ -438,8 +466,13 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 .attr("text-anchor", function(d) {
                     return d.children || d._children ? "end" : "start";
                 })
+                .attr("data-toggle", "popover")
+                .attr("data-trigger", "hover")
+                .attr("data-html","true")
+                .attr("onclick",function(d) { return "window.location = '/wiki/" + d.master.name.replace(' ','-') + "';";})
+                .attr("data-content", function(d){ return d.master.overview.replace(/(?:\r\n|\r|\n)/g, '<br/>');;})
                 .text(function(d) {
-                    return d.master.name;
+                    return d.master.name + ' ' + d.master.name_native;
                 })
                 .style("fill-opacity", 0);
     
@@ -448,7 +481,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 .attr('class', 'ghostCircle')
                 .attr("r", 30)
                 .attr("opacity", 0.2) // change this to zero to hide the target area
-            .style("fill", "red")
+                .style("fill", "red")
                 .attr('pointer-events', 'mouseover')
                 .on("mouseover", function(node) {
                     overCircle(node);
@@ -469,7 +502,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     return d.children || d._children ? "end" : "start";
                 })
                 .text(function(d) {
-                    return d.master.name;
+                    return d.master.name + ' ' + d.master.name_native;
                 });
     
             // Change the circle fill depending on whether it has children and is collapsed
@@ -548,6 +581,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             nodes.forEach(function(d) {
                 d.x0 = d.x;
                 d.y0 = d.y;
+                teachers.push(d);
             });
         }
     
@@ -562,4 +596,10 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
         // Layout the tree initially and center on the root node.
         update(root);
         alignNode(root);
+
+        treeFunctions.centerNode = function (d) { centerNode(d, true) }; 
+
+        enablePopovers();
+        enableSearch();
+
     });

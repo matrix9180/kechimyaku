@@ -1,19 +1,23 @@
 .row
   div style="min-width: #{(indent * 30).to_s}px; display: inline;"
-  .col-md-8
+  div
     h5
       = master.name
     button{ 
       type="button" 
-      class="btn btn-dark btn-sm"
+      class="btn btn-info btn-dark btn-sm"
       onclick="window.location = '/admin/masters/add/' + '#{master.id}'"} Add Descendant
     button{ 
       type="button" 
-      class="btn btn-dark btn-sm"
-      onclick="window.location = '/admin/masters/edit/' + '#{master.id}'"} Edit
+      class="btn btn-info btn-dark btn-sm"
+      onclick="window.location = '/admin/masters/edit/' + '#{master.id}'"} Edit Properties
+    button{ 
+      type="button" 
+      class="btn btn-info btn-dark btn-sm"
+      onclick="window.location = '/wiki/edit/' + '#{master.name.gsub(' ','-')}'"} Edit Wiki
     button{ 
       type="button"
-      class="btn btn-dark btn-sm" 
+      class="btn btn-info btn-dark btn-sm" 
       onclick="if(confirm('Delete #{master.name}?')) {window.location = '/admin/masters/delete/' + '#{master.id}'}"} Delete
 hr
 -master.child_masters.each do |m|

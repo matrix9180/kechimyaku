@@ -29,3 +29,9 @@ form action="#{'/admin/masters/edit/' + params[:id]}" method="post"
     textarea name="overview" class="form-control" placeholder="Overview..." rows="10" =@master.overview
   .form-group
     button type="submit" class="btn btn-dark" Update Master
+
+  .row
+    h2 Wikipedia Content
+  .row
+    .col-md-12
+      =@wikipedia_content
