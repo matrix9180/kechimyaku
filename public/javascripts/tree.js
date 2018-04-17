@@ -1,38 +1,9 @@
-/*Copyright (c) 2013-2016, Rob Schmuecker
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-* The name Rob Schmuecker may not be used to endorse or promote products
-  derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL MICHAEL BOSTOCK BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
-
-
-// Get JSON data
 
 var teachers = [];
 var treeFunctions = {}
 
 treeJSON = d3.json("/api/masters", function(error, treeData) {
-    
+
         // Calculate total nodes, max label length
         var totalNodes = 0;
         var maxLabelLength = 20;
@@ -46,27 +17,27 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
         var i = 0;
         var duration = 750;
         var root;
-    
+
         // size of the diagram
         var viewerWidth = $(document).width();
         var viewerHeight = $(document).height();
-    
+
         var tree = d3.layout.tree()
             .size([viewerHeight, viewerWidth]);
-    
+
         // define a d3 diagonal projection for use by the node paths later on.
         var diagonal = d3.svg.diagonal()
             .projection(function(d) {
                 return [d.y, d.x];
             });
-    
+
         // A recursive helper function for performing some setup by walking through all nodes
-    
+
         function visit(parent, visitFn, childrenFn) {
             if (!parent) return;
-    
+
             visitFn(parent);
-    
+
             var children = childrenFn(parent);
             if (children) {
                 var count = children.length;
@@ -75,19 +46,19 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 }
             }
         }
-    
+
         // Call visit function to establish maxLabelLength
         visit(treeData, function(d) {
             totalNodes++;
             maxLabelLength = Math.max(d.master.name.length + d.master.name_native.length, maxLabelLength);
-    
+
         }, function(d) {
             return d.children && d.children.length > 0 ? d.children : null;
         });
-    
-    
+
+
         // sort the tree according to the node names
-    
+
         function sortTree() {
             tree.sort(function(a, b) {
                 return (b.children != null) ? b.children.length : 0 < (a.children != null) ? a.children.length : 0;
@@ -95,9 +66,9 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
         }
         // Sort the tree initially incase the JSON isn't in a sorted order.
         //sortTree();
-    
+
         // TODO: Pan function, can be better implemented.
-    
+
         function pan(domNode, direction) {
             var speed = panSpeed;
             if (panTimer) {
@@ -122,23 +93,23 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 }, 50);
             }
         }
-    
+
         // Define the zoom function for the zoomable tree
-    
+
         function zoom() {
             svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         }
-    
-    
+
+
         // define the zoomListener which calls the zoom function on the "zoom" event constrained within the scaleExtents
         var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
-    
+
         function initiateDrag(d, domNode) {
             draggingNode = d;
             d3.select(domNode).select('.ghostCircle').attr('pointer-events', 'none');
             d3.selectAll('.ghostCircle').attr('class', 'ghostCircle show');
             d3.select(domNode).attr('class', 'node activeDrag');
-    
+
             svgGroup.selectAll("g.node").sort(function(a, b) { // select the parent and sort the path's
                 if (a.id != draggingNode.id) return 1; // a is not the hovered element, send "a" to the back
                 else return -1; // a is the hovered element, bring "a" to the front
@@ -162,7 +133,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                         return true;
                     }).remove();
             }
-    
+
             // remove parent link
             parentLink = tree.links(tree.nodes(draggingNode.parent));
             svgGroup.selectAll('path.link').filter(function(d, i) {
@@ -171,18 +142,18 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 }
                 return false;
             }).remove();
-    
+
             dragStarted = null;
         }
-    
+
         // define the baseSvg, attaching a class for styling and the zoomListener
         var baseSvg = d3.select("#tree-container").append("svg")
             .attr("width", viewerWidth)
             .attr("height", viewerHeight)
             .attr("class", "overlay")
             .call(zoomListener);
-    
-    
+
+
         // Define the drag listeners for drag/drop behaviour of nodes.
         dragListener = d3.behavior.drag()
             .on("dragstart", function(d) {
@@ -202,14 +173,14 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     domNode = this;
                     initiateDrag(d, domNode);
                 }
-    
+
                 // get coords of mouseEvent relative to svg container to allow for panning
                 relCoords = d3.mouse($('svg').get(0));
                 if (relCoords[0] < panBoundary) {
                     panTimer = true;
                     pan(this, 'left');
                 } else if (relCoords[0] > ($('svg').width() - panBoundary)) {
-    
+
                     panTimer = true;
                     pan(this, 'right');
                 } else if (relCoords[1] < panBoundary) {
@@ -222,10 +193,10 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     try {
                         clearTimeout(panTimer);
                     } catch (e) {
-    
+
                     }
                 }
-    
+
                 d.x0 += d3.event.dy;
                 d.y0 += d3.event.dx;
                 var node = d3.select(this);
@@ -260,7 +231,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     endDrag();
                 }
             });
-    
+
         function endDrag() {
             selectedNode = null;
             d3.selectAll('.ghostCircle').attr('class', 'ghostCircle');
@@ -274,9 +245,9 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 draggingNode = null;
             }
         }
-    
+
         // Helper functions for collapsing and expanding nodes.
-    
+
         function collapse(d) {
             if (d.children) {
                 d._children = d.children;
@@ -284,7 +255,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 d.children = null;
             }
         }
-    
+
         function expand(d) {
             if (d._children) {
                 d.children = d._children;
@@ -292,7 +263,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 d._children = null;
             }
         }
-    
+
         var overCircle = function(d) {
             selectedNode = d;
             updateTempConnector();
@@ -301,7 +272,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             selectedNode = null;
             updateTempConnector();
         };
-    
+
         // Function to update the temporary connector indicating dragging affiliation
         var updateTempConnector = function() {
             var data = [];
@@ -319,38 +290,38 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 }];
             }
             var link = svgGroup.selectAll(".templink").data(data);
-    
+
             link.enter().append("path")
                 .attr("class", "templink")
                 .attr("d", d3.svg.diagonal())
                 .attr('pointer-events', 'none');
-    
+
             link.attr("d", d3.svg.diagonal());
-    
+
             link.exit().remove();
         };
-    
+
         // Function to center node when clicked/dropped so node doesn't get lost when collapsing/moving with large amount of children.
-    
+
         function centerNode(source, highlight) {
 
             sourceNode = source;
             highlight = highlight || false;
 
-            
+
             if (highlight) {
-                
+
                 node = svgGroup.selectAll("g.node").filter(function(n, i) {
                     if(n.id == sourceNode.id) {
                         return true;
-                    } 
+                    }
                     else {
                         return false;
                     }
                 });
 
                 if (node){
-                    node[0][0].children[1].setAttribute("class", "nodeTextHighlight")                
+                    node[0][0].children[1].setAttribute("class", "nodeTextHighlight")
                 }
             }
 
@@ -366,7 +337,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             zoomListener.scale(scale);
             zoomListener.translate([x, y]);
         }
-        
+
         function alignNode(source) {
             scale = zoomListener.scale();
             x = -source.y0;
@@ -382,7 +353,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
 
 
         // Toggle children function
-    
+
         function toggleChildren(d) {
             if (d.children) {
                 d._children = d.children;
@@ -393,9 +364,9 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             }
             return d;
         }
-    
+
         // Toggle children on click.
-    
+
         function click(d) {
             if (d3.event.defaultPrevented) return; // click suppressed
             d = toggleChildren(d);
@@ -403,17 +374,17 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
             //update(d);
             //centerNode(d);
         }
-    
+
         function update(source) {
             // Compute the new height, function counts total children of root node and sets tree height accordingly.
             // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
             // This makes the layout more consistent.
             var levelWidth = [1];
             var childCount = function(level, n) {
-    
+
                 if (n.children && n.children.length > 0) {
                     if (levelWidth.length <= level + 1) levelWidth.push(0);
-    
+
                     levelWidth[level + 1] += n.children.length;
                     n.children.forEach(function(d) {
                         childCount(level + 1, d);
@@ -421,13 +392,13 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 }
             };
             childCount(0, root);
-            var newHeight = d3.max(levelWidth) * 140; // 25 pixels per line  
+            var newHeight = d3.max(levelWidth) * 140; // 25 pixels per line
             tree = tree.size([newHeight, viewerWidth]);
-    
+
             // Compute the new tree layout.
             var nodes = tree.nodes(root).reverse(),
                 links = tree.links(nodes);
-    
+
             // Set widths between levels based on maxLabelLength.
             nodes.forEach(function(d) {
                 d.y = (d.depth * (maxLabelLength * 6)); //maxLabelLength * 10px
@@ -435,30 +406,30 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 // Normalize for fixed-depth by commenting out below line
                 // d.y = (d.depth * 500); //500px per level.
             });
-    
+
             // Update the nodes…
             node = svgGroup.selectAll("g.node")
                 .data(nodes, function(d) {
                     return d.id || (d.id = ++i);
                 });
-    
+
             // Enter any new nodes at the parent's previous position.
             var nodeEnter = node.enter().append("g")
                 .call(dragListener)
-                .attr("id", function(d){return d.master.id})                
+                .attr("id", function(d){return d.master.id})
                 .attr("class", "node")
                 .attr("transform", function(d) {
                     return "translate(" + source.y0 + "," + source.x0 + ")";
                 })
                 .on('click', click);
-    
+
             nodeEnter.append("circle")
                 .attr('class', 'nodeCircle')
                 .attr("r", 0)
                 .style("fill", function(d) {
                     return d._children ? "lightsteelblue" : "#fff";
                 });
-    
+
             nodeEnter.append("text")
                 .attr("y", "-20")
                 .attr("dy", ".35em")
@@ -475,7 +446,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     return d.master.name + ' ' + d.master.name_native;
                 })
                 .style("fill-opacity", 0);
-    
+
             // phantom node to give us mouseover in a radius around it
             nodeEnter.append("circle")
                 .attr('class', 'ghostCircle')
@@ -489,7 +460,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 .on("mouseout", function(node) {
                     outCircle(node);
                 });
-    
+
             // Update the text to reflect whether node has children or not.
             node.select('text')
                 .attr("x", function(d) {
@@ -504,25 +475,25 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 .text(function(d) {
                     return d.master.name + ' ' + d.master.name_native;
                 });
-    
+
             // Change the circle fill depending on whether it has children and is collapsed
             node.select("circle.nodeCircle")
                 .attr("r", 4.5)
                 .style("fill", function(d) {
                     return d._children ? "lightsteelblue" : "#fff";
                 });
-    
+
             // Transition nodes to their new position.
             var nodeUpdate = node.transition()
                 .duration(duration)
                 .attr("transform", function(d) {
                     return "translate(" + d.y + "," + d.x + ")";
-                });   
-    
+                });
+
             // Fade the text in
             nodeUpdate.select("text")
                 .style("fill-opacity", 1);
-    
+
             // Transition exiting nodes to the parent's new position.
             var nodeExit = node.exit().transition()
                 .duration(duration)
@@ -530,19 +501,19 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     return "translate(" + source.y + "," + source.x + ")";
                 })
                 .remove();
-    
+
             nodeExit.select("circle")
                 .attr("r", 0);
-    
+
             nodeExit.select("text")
                 .style("fill-opacity", 0);
-    
+
             // Update the links…
             var link = svgGroup.selectAll("path.link")
                 .data(links, function(d) {
                     return d.target.id;
                 });
-    
+
             // Enter any new links at the parent's previous position.
             link.enter().insert("path", "g")
                 .attr("class", "link")
@@ -556,12 +527,12 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                         target: o
                     });
                 });
-    
+
             // Transition links to their new position.
             link.transition()
                 .duration(duration)
                 .attr("d", diagonal);
-    
+
             // Transition exiting nodes to the parent's new position.
             link.exit().transition()
                 .duration(duration)
@@ -576,7 +547,7 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                     });
                 })
                 .remove();
-    
+
             // Stash the old positions for transition.
             nodes.forEach(function(d) {
                 d.x0 = d.x;
@@ -584,22 +555,55 @@ treeJSON = d3.json("/api/masters", function(error, treeData) {
                 teachers.push(d);
             });
         }
-    
+
         // Append a group which holds all nodes and which the zoom Listener can act upon.
         var svgGroup = baseSvg.append("g");
-    
+
         // Define the root
         root = treeData;
         root.x0 = viewerHeight / 2;
         root.y0 = 0;
-    
+
         // Layout the tree initially and center on the root node.
         update(root);
         alignNode(root);
 
-        treeFunctions.centerNode = function (d) { centerNode(d, true) }; 
+        treeFunctions.centerNode = function (d) { centerNode(d, true) };
 
         enablePopovers();
         enableSearch();
 
     });
+
+
+/*
+Portions of code are:
+
+Copyright (c) 2013-2016, Rob Schmuecker
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* The name Rob Schmuecker may not be used to endorse or promote products
+  derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL MICHAEL BOSTOCK BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/

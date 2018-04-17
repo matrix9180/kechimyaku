@@ -10,6 +10,10 @@ configure :development do
   set :database, 'sqlite3:db/database.db'
 end
 
+configure :production do
+  set :database, 'sqlite3:db/database.db'
+end
+
 wiki_options = {
   :live_preview  => true,
   :allow_uploads => true,

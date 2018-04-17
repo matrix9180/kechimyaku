@@ -1,2 +1,11 @@
 *.db
 notes.txt
+coverage
+pkg
+.DS_Store
+.bundle
+Gemfile.lock
+*.gem
+*.swp
+.*
+wiki_repo

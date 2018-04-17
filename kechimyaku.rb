@@ -156,7 +156,7 @@ class Kechimyaku < Sinatra::Base
       if master.name
         master_name_wiki_formatted = get_master_name_wiki(master)
 
-        wikipedia_page = Wikipedia.find(master.name)
+        wikipedia_page = Wikipedia.find(master.name.gsub(/[^ A-Za-z]/, ''))
         wikipedia_content = ''        
         if wikipedia_page.text
           wikipedia_content = wikipedia_page.text
@@ -215,3 +215,5 @@ end
 def render_master_list(master, indent)
   Slim::Template.new("./views/admin/masters/partials/master_listing.slim", {}).render(Object.new, {master: master, indent: indent})
 end
+
+
