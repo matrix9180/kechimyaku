@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-gem "sinatra", '~> 1.4', '>= 1.4.4'
+gem "sinatra", '>= 1.4.4', '~> 1.4'
 gem "sinatra-reloader"
 gem "thin"
 gem "daemons"
@@ -12,10 +12,10 @@ gem 'require_all'
 gem 'wikipedia-client'
 gem 'gollum-rugged_adapter'
 gem 'gollum-lib'
-gem 'gollum'
+gem 'gollum', '>=4.1.2', '~>4.1'
 
 group :development do
-    gem 'shotgun'
-    gem 'pry'
-    gem 'tux'
+  gem 'shotgun'
+  gem 'pry'
+  gem 'tux'
 end
