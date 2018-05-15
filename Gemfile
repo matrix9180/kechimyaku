@@ -13,6 +13,9 @@ gem 'wikipedia-client'
 gem 'gollum-rugged_adapter'
 gem 'gollum-lib'
 gem 'gollum', '>=4.1.2', '~>4.1'
+gem 'pundit'
+gem 'rack-contrib'
+gem 'bcrypt'
 
 group :development do
   gem 'shotgun'

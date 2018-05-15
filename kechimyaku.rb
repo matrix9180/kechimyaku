@@ -7,41 +7,70 @@ require 'sinatra/activerecord'
 require 'gollum-lib'
 require 'wikipedia'
 
-
 class Kechimyaku < Sinatra::Base
+  use Rack::Session::Cookie, secret: 'CHANGE_ME'
 
-  def get_wiki
-    wiki = Gollum::Wiki.new("wiki_repo/", :base_path => "wiki")
+  def current_user
+    @current_user ||= User.find(session[:user_id]) if session[:user_id]
   end
 
-  def get_master_name_wiki(master)
-    master_name_wiki = master.name.gsub(' ', '-')
+  get '/login' do
+    slim :login
   end
-  
+
+  post '/login' do
+    user = User.find_by(email: params.dig(:login, :email))
+    if user&.authenticate(params.dig(:login, :password))
+      session[:user_id] = user.id
+      redirect '/'
+    else
+      slim :login
+    end
+  end
+
+  get '/logout' do
+    session[:user_id] = nil
+    redirect '/'
+  end
+
+  get '/signup' do
+
+    slim :signup
+  end
+
+  post '/signup' do
+
+    if User.create(params[:signup])
+      redirect '/login'
+    else
+      slim :signup
+    end
+  end
+
   get '/?' do
     slim :home
   end
 
   get '/api/masters/?' do
     @master = Master.where(is_root: true).first
-    master_tree = generate_master_tree(@master)
-    content_type :json 
+    master_tree = @master ? generate_master_tree(@master) : {}
+    content_type :json
     master_tree.to_json
   end
 
   get '/admin/?' do
-    redirect :"admin/masters"  
+    redirect :"admin/masters"
   end
 
   get '/admin/masters/?:id?' do
     if (params[:id] != nil)
       puts params[:id]
-      @master = Relationship.where(:child_master_id => params[:id]).first.parent_master    
+      @master = Relationship.where(:child_master_id => params[:id]).first.parent_master
     else
-      @master = Master.where(is_root: true).first    
+      @master = Master.where(is_root: true).first
     end
 
-    slim :"admin/masters/masters"  
+    slim :"admin/masters/masters"
   end
 
   get '/admin/masters/add/?:parent_id?' do
@@ -65,7 +94,7 @@ class Kechimyaku < Sinatra::Base
     else
       new_master.is_root = false
       new_master.save
-      
+
       new_relationship = Relationship.new
       new_relationship.parent_master_id = params[:parent_id]
       new_relationship.child_master_id = new_master.id
@@ -76,11 +105,11 @@ class Kechimyaku < Sinatra::Base
     #create wiki page
     wiki = get_wiki()
     master_name_wiki_formatted = get_master_name_wiki(new_master)
-    
+
     commit = { :message => 'creating wiki for ' + new_master.name,
       :name => 'Kenneth Miller',
       :email => 'ken@kechimyaku.com' }
-    
+
     wiki.write_page(master_name_wiki_formatted, :markdown, '', commit)
 
     redirect "admin/masters/" + new_master.id.to_s
@@ -89,7 +118,7 @@ class Kechimyaku < Sinatra::Base
   get '/admin/masters/edit/:id' do
     @master = Master.find(params[:id])
     @masters = Master.all
-    @relationship = Relationship.where(child_master_id: @master.id).first 
+    @relationship = Relationship.where(child_master_id: @master.id).first
     @relationship_types = RelationshipType.all
 
     slim :"/admin/masters/edit"
@@ -105,7 +134,7 @@ class Kechimyaku < Sinatra::Base
     master.location = params[:location]
     master.overview = params[:overview]
 
-    relationship = Relationship.where(child_master_id: master.id).first 
+    relationship = Relationship.where(child_master_id: master.id).first
 
     if (params[:parent_id] == "")
       master.is_root = true
@@ -120,7 +149,7 @@ class Kechimyaku < Sinatra::Base
       if (relationship == nil)
         relationship = Relationship.new
       end
-    
+
       relationship.parent_master_id = params[:parent_id]
       relationship.child_master_id = master.id
       relationship.relationship_type_id = params[:relationship_type_id]
@@ -135,14 +164,14 @@ class Kechimyaku < Sinatra::Base
       wiki.update_page(page, current_master_name_wiki, page.format, page.raw_data, commit)
     end
 
-    redirect :"admin/masters"  
+    redirect :"admin/masters"
   end
 
   get '/admin/masters/delete/:id' do
     master = Master.find(params[:id])
     master.delete
-    redirect :"admin/masters"  
-    
+    redirect :"admin/masters"
+
   end
 
   get '/admin/sync_wiki/?' do
@@ -157,19 +186,19 @@ class Kechimyaku < Sinatra::Base
         master_name_wiki_formatted = get_master_name_wiki(master)
 
         wikipedia_page = Wikipedia.find(master.name.gsub(/[^ A-Za-z]/, ''))
-        wikipedia_content = ''        
+        wikipedia_content = ''
         if wikipedia_page.text
           wikipedia_content = wikipedia_page.text
-        end 
+        end
         page = wiki.page(master_name_wiki_formatted)
         wikipedia_content.gsub!('=== ', '###')
         wikipedia_content.gsub!(' ===', '')
         wikipedia_content.gsub!(' ==', '')
         wikipedia_content.gsub!('== ', '###')
-        puts master_name_wiki_formatted        
+        puts master_name_wiki_formatted
         if !page
           wiki.write_page(master_name_wiki_formatted, :markdown, wikipedia_content, commit)
-        end    
+        end
       end
     end
 
@@ -179,21 +208,40 @@ end
 
 #ENTITIES
 
+class User < ActiveRecord::Base
+  validates :first_name, :last_name, presence: true
+  validates :email, uniqueness: true
+  has_secure_password
+  enum role: [:user, :mod, :admin]
+
+  def name
+    [first_name,last_name].compact.join(' ')
+  end
+end
+
 class Master < ActiveRecord::Base
   has_many :relationships, foreign_key: :parent_master_id
   has_many :child_masters, through: :relationships, source: :child_master
-  
+
 end
 
 class Relationship < ActiveRecord::Base
-  belongs_to :child_master, class_name: "Master", foreign_key: :child_master_id 
-  belongs_to :parent_master, class_name: "Master", foreign_key: :parent_master_id 
+  belongs_to :child_master, class_name: "Master", foreign_key: :child_master_id
+  belongs_to :parent_master, class_name: "Master", foreign_key: :parent_master_id
 end
 
 class RelationshipType < ActiveRecord::Base
 end
 
 #FUNCTIONS
+
+def get_wiki
+  wiki = Gollum::Wiki.new("wiki_repo/", :base_path => "wiki")
+end
+
+def get_master_name_wiki(master)
+  master_name_wiki = master.name.gsub(' ', '-')
+end
 
 def generate_master_tree(master)
   node = {}
@@ -215,5 +263,3 @@ end
 def render_master_list(master, indent)
   Slim::Template.new("./views/admin/masters/partials/master_listing.slim", {}).render(Object.new, {master: master, indent: indent})
 end
-
-

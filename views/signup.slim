@@ -1,0 +1,24 @@
+h2 Sign Up
+form#signup method="post"
+  .form-group
+    label for="signup_first_name"
+      | First name
+    input type="text" class="form-control" name="signup[first_name]" id="signup_first_name"
+  .form-group
+    label for="signup_last_name"
+      | Last name
+    input type="text" class="form-control" name="signup[last_name]" id="signup_last_name"
+  .form-group
+    label for="signup_email"
+      | Email
+    input type="email" class="form-control" name="signup[email]" id="signup_email" placeholder="user@example.com" required="required"
+  .form-group
+    label for="signup_password"
+      | Password
+    input type="password" class="form-control" name="signup[password]" id="signup_password" required="required"
+    .form-group
+      label for="signup_password_confirmation"
+        | Confirm Password
+      input type="password" class="form-control" name="signup[password_confirmation]" id="signup_password_confirmation" required="required"
+  button.btn.btn-primary type="submit"
+    | Sign Up

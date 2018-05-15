@@ -1,0 +1,12 @@
+h2 Log In
+form#login method="post"
+  .form-group
+    label for="login_email"
+      | Email
+    input type="email" class="form-control" name="login[email]" id="login_email" placeholder="user@example.com" required="required"
+  .form-group
+    label for="login_password"
+      | Password
+    input type="password" class="form-control" name="login[password]" id="login_password" required="required"
+  button.btn.btn-primary type="submit"
+    | Log In

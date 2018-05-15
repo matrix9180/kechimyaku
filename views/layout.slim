@@ -3,7 +3,7 @@ doctype html
 
 meta[charset="utf-8"]
 
-link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
 
 script[src="https://code.jquery.com/jquery-3.2.1.slim.min.js"]
 
@@ -11,7 +11,7 @@ script[src="https://unpkg.com/tether@1.4.1/dist/js/tether.js"]
 
 script[src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"]
 
-script[src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"]
+script[src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"]
 
 script[src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.min.js"]
 
@@ -23,22 +23,22 @@ script[src="javascripts/kechimyaku.js"]
 
 
 css:
-  .node { cursor: pointer; } 
-  .overlay{ background-color:#fff; } 
-  .node circle { fill: #fff; stroke: #ed1c24; stroke-width: 1.5px; } 
-  .nodeText { 
-    font-size:12pt; 
+  .node { cursor: pointer; }
+  .overlay{ background-color:#fff; }
+  .node circle { fill: #fff; stroke: #ed1c24; stroke-width: 1.5px; }
+  .nodeText {
+    font-size:12pt;
     font-family:sans-serif;
   }
-  .nodeTextHighlight { 
-    font-size:12pt; 
+  .nodeTextHighlight {
+    font-size:12pt;
     font-family:sans-serif;
     font-weight: bold;
     text-decoration: underline;
-  }  
-  .link { fill: none; stroke: #ed1c24; stroke-width: 1.5px; } 
-  .templink { fill: none; stroke: red; stroke-width: 3px; } 
-  .ghostCircle.show{ display:block; } 
+  }
+  .link { fill: none; stroke: #ed1c24; stroke-width: 1.5px; }
+  .templink { fill: none; stroke: red; stroke-width: 3px; }
+  .ghostCircle.show{ display:block; }
   .ghostCircle, .activeDrag .ghostCircle{ display: none; }
   a {color: #ed1c24;}
   .btn {margin-right: 5px;}
@@ -52,12 +52,26 @@ css:
   input:focus {outline:none !important; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(237,28,36, 0.1) !important; !important; border:1px solid #ed1c24 !important;}
 
 body
-  nav class="navbar navbar-default"
+  nav class="navbar navbar-light"
     a class="navbar-brand" href="/"
       img class="logo" alt="Kechimyaku" src="/images/kechimyaku_logo.png"
     div id="search"
       input class="typeahead form-control" type="text" placeholder="Search Zen Teachers..."
-    
-  
+    div.navbar-expand
+      ul.navbar-nav.mr-auto
+        - unless current_user
+          li.nav-item
+            a.nav-link href="/login"
+              | Log In
+          li.nav-item
+            a.nav-link href="/signup"
+              | Sign Up
+        - else
+          li.nav-item
+            span.navbar-text= current_user.name
+          li.nav-item
+            a.nav-link href="/logout"
+              | Log Out
+
   .container
     == yield
